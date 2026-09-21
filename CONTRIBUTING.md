@@ -16,10 +16,11 @@ Requirements: Node.js 20+.
 ## Workflow
 
 1. Run the connectivity check first: `npm run check:llm`
-2. Unit tests: `npm test`
-3. Lint: `npm run lint`
-4. Build: `npm run build`
-5. Opt-in live tests (needs a local 1.21.1 server + key, non-destructive):
+2. Run the daemon with `npm run dev` and talk to the bot in-game (terminal is logs-only)
+3. Unit tests: `npm test`
+4. Lint: `npm run lint`
+5. Build: `npm run build`
+6. Opt-in live tests (needs a local 1.21.1 server + key, non-destructive):
    `LODESTONE_API_KEY=... RUN_INTEGRATION=1 npm run test:integration`
 
 Please keep PRs small and include/extend tests for behavior changes.

@@ -63,19 +63,35 @@ reference). Highlights:
   `allow_sprinting`, `allow_parkour`, `max_drop_down`, `allow_1by1_towers`).
   No placing in M1 by design.
 
-## Running the agent
+## Running the agent (daemon)
 
 ```bash
-npm run dev -- "Collect 5 oak logs, then tell me in chat when you're done"
-npm run dev -- --config ./config.yaml "Your goal here"
-echo "Your goal here" | npm run dev
+npm run dev                      # joins server, stays online, chat in-game
+npm run dev -- --config ./config.yaml
 ```
 
-Ctrl+C cancels the run (aborts the in-flight LLM request and tool).
+The terminal is logs-only. Talk to the bot in Minecraft chat. It reads
+SOUL.md/MEMORY.md/TASKS.md on boot (created from the .example.md templates
+if missing), works TASKS.md top-down when idle, and heartbeats every
+`agent.heartbeat_seconds` (default 30s).
+
+## Memory files
+
+- `SOUL.md` — identity + standing instructions (restart to apply edits).
+- `MEMORY.md` — facts it learns (players, places, events).
+- `TASKS.md` — checklist it works when idle. Add tasks in chat
+  ("add a task: build a fence") or by editing the file while offline.
+- Live files are gitignored; templates (`SOUL.example.md`, etc.) are committed.
+
+## Safety
+
+In-game chat is untrusted input: anyone on the server can talk to the bot.
+Blast radius is scoped — no shell, no arbitrary code, file writes limited to
+the three memory files. See SECURITY.md.
 
 ## Scripts
 
-- `npm run dev` — run the agent (goal via CLI arg or stdin)
+- `npm run dev` — run the agent daemon (joins server, stays online)
 - `npm run build` — typecheck + emit to `dist/`
 - `npm test` — unit tests (Vitest)
 - `npm run lint` — eslint
