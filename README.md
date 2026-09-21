@@ -1,5 +1,9 @@
 # Lodestone
 
+[![Node >= 20](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
+[![Minecraft 1.21.1](https://img.shields.io/badge/minecraft-1.21.1-blue)](https://www.minecraft.net)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
+
 AI agent harness for Minecraft Java Edition bots (target **1.21.1**). An AI agent
 controls a Mineflayer bot through high-level tools, driven by our own agent loop
 built directly on the Anthropic Messages API (`@anthropic-ai/sdk` with a custom
@@ -80,3 +84,13 @@ Ctrl+C cancels the run (aborts the in-flight LLM request and tool).
   non-destructive (observe + goto only, no digging/placing).
   Needs `config.yaml` plus the key env var, e.g.
   `LODESTONE_API_KEY=... RUN_INTEGRATION=1 npm run test:integration`
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Never commit `config.yaml` or `.env`
+(both gitignored) — keys live in env vars only. Please report vulnerabilities
+privately per [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).

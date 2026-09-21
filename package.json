@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "description": "AI agent harness for Minecraft bots (Mineflayer + Anthropic Messages API)",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zRuvix/Lodestone.git"
+  },
+  "author": "zRuvix",
   "scripts": {
     "dev": "tsx src/cli.ts",
     "build": "tsc",
