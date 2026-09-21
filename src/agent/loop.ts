@@ -126,6 +126,11 @@ export function createAgent(options: AgentOptions) {
   }
 
   function inject(text: string) {
+    // Damage ticks are noise: collapse repeats so a fight can't wedge
+    // the queue (and the model's context) behind dozens of identical events.
+    if (text.startsWith("[damage]") && injectQueue.some((q) => q.startsWith("[damage]"))) {
+      return;
+    }
     injectQueue.push(text);
   }
 

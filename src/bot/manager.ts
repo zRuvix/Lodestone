@@ -73,7 +73,14 @@ export function createBotManager(config: LodestoneConfig): BotManager {
   }
 
   function wireRuntimeEvents(b: Bot) {
-    b.on("entityHurt", () => {
+    let lastDamageAt = 0;
+    b.on("entityHurt", (entity: unknown, _damage?: unknown) => {
+      // Throttle: a single fight produces many entityHurt events per second.
+      // Only emit for the bot's own entity, at most once per 3s.
+      if (entity !== b.entity) return;
+      const now = Date.now();
+      if (now - lastDamageAt < 3000) return;
+      lastDamageAt = now;
       events.emit("damage");
     });
     b.on("chat", (username: string, message: string) => {

@@ -96,6 +96,9 @@ async function main(): Promise<void> {
     console.log(`[chat] <${username}> ${message}`);
   });
   manager.events.on("death", () => console.log("[event] died"));
+  // Damage is log-only, never injected: it fires many times per second in a
+  // fight and would wedge the model's context behind noise (plus the rate
+  // limiter would burn turns on it instead of replying to chat).
   manager.events.on("damage", () => console.log("[event] damage"));
 
   const limiter = createSayLimiter(config.chat);
