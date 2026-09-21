@@ -8,6 +8,7 @@ import { applyMovements } from "./tools/movements.js";
 import { ensureMemoryFiles } from "./memory/files.js";
 import { HEARTBEAT_PROMPT, shouldSkipHeartbeatTick } from "./daemon/tick.js";
 import { createSayLimiter, formatChatInject, isSelf } from "./chat/router.js";
+import { createChatLane } from "./chat/fastlane.js";
 
 function parseArgs(argv: string[]): { configPath: string } {
   let configPath = process.env["LODESTONE_CONFIG"] ?? "./config.yaml";
@@ -104,6 +105,8 @@ async function main(): Promise<void> {
   const limiter = createSayLimiter(config.chat);
   let busy = false;
 
+  const llm = createLlmClient(config, apiKey);
+
   const agent = createAgent({
     goal: "You are now online. Read SOUL.md, MEMORY.md, TASKS.md, then observe.",
     systemPrompt,
@@ -113,7 +116,7 @@ async function main(): Promise<void> {
     parallelReadOnlyTools: config.agent.parallel_read_only_tools,
     temperature: config.llm.temperature,
     promptCaching: config.llm.prompt_caching,
-    llm: createLlmClient(config, apiKey),
+    llm,
     ctx: { bot, config },
     hooks: {
       beforeTool: (name, input) => {
@@ -138,9 +141,21 @@ async function main(): Promise<void> {
     },
   });
 
+  const lane = createChatLane({
+    llm,
+    say: (msg) => bot.chat(msg),
+    forward: (text) => agent.inject(text),
+    limiter,
+    fastMaxTokens: config.chat.fast_max_tokens,
+    botName: config.minecraft.username,
+  });
   manager.events.on("chat", (username: string, message: string) => {
     if (isSelf(username, config.minecraft.username)) return;
-    agent.inject(formatChatInject(username, message));
+    if (!config.chat.fast_lane) {
+      agent.inject(formatChatInject(username, message));
+      return;
+    }
+    void lane.handleChat(username, message);
   });
 
   let shuttingDown = false;
