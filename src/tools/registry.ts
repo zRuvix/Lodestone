@@ -2,7 +2,9 @@ import { toJSONSchema } from "zod";
 import { collectBlockTool } from "./collectBlock.js";
 import { gotoTool } from "./goto.js";
 import { observeTool } from "./observe.js";
+import { readFileTool } from "./readFile.js";
 import { sayTool } from "./say.js";
+import { writeFileTool } from "./writeFile.js";
 import type { ToolDef } from "./types.js";
 
 export const TOOL_REGISTRY: ToolDef[] = [
@@ -10,6 +12,8 @@ export const TOOL_REGISTRY: ToolDef[] = [
   gotoTool,
   collectBlockTool,
   sayTool,
+  readFileTool,
+  writeFileTool,
 ];
 
 export interface AnthropicToolDef {
