@@ -88,7 +88,18 @@ async function runOneCall(
     options.hooks?.afterTool?.(def.name, result);
     return { id: block.id, ...result };
   }
-  options.hooks?.beforeTool?.(def.name, validated.value);
+  try {
+    options.hooks?.beforeTool?.(def.name, validated.value);
+  } catch (err) {
+    // Hook veto (e.g. daemon say rate-limit): surface as an isError result
+    // so the model sees it instead of crashing the loop.
+    const result = {
+      text: `Error: tool '${def.name}' pre-check failed: ${err instanceof Error ? err.message : String(err)}`,
+      isError: true,
+    };
+    options.hooks?.afterTool?.(def.name, result);
+    return { id: block.id, ...result };
+  }
   let result: { text: string; isError: boolean };
   try {
     result = await def.run(validated.value, options.ctx, signal);
