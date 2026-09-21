@@ -242,6 +242,18 @@ export function createAgent(options: AgentOptions) {
       messages.push({ role: "assistant", content: toAnthropicContent(response) as never });
 
       if (toolUses.length === 0) {
+        // Queued arrivals (chat, heartbeat) must still be delivered when the
+        // model made no tool calls — otherwise chat waits indefinitely while
+        // the model idles with text-only replies.
+        if (injectQueue.length > 0) {
+          const queued: MessageParam["content"] = [];
+          while (injectQueue.length > 0) {
+            queued.push({ type: "text" as const, text: injectQueue.shift()! });
+          }
+          messages.push({ role: "user", content: queued });
+          messages = trimObservations(messages, options.keepLastObservations);
+          continue;
+        }
         const stop = response.stopReason;
         if (stop === "end_turn" || stop === null) {
           return { status: "done", turns: turns + 1, inputTokens: totalIn, outputTokens: totalOut };
