@@ -29,9 +29,12 @@ const agentSchema = z.object({
   system_prompt_file: z.string().min(1).default("prompts/system.md"),
   allowed_tools: z
     .array(z.string())
-    .default(["observe", "goto", "collect_block", "say"]),
+    .default(["observe", "goto", "collect_block", "say", "read_file", "write_file"]),
   parallel_read_only_tools: z.boolean().default(false),
   keep_last_observations: z.number().int().min(0).default(3),
+  heartbeat_seconds: z.number().positive().default(30),
+  heartbeat_max_turns: z.number().int().positive().default(8),
+  reconnect_attempts: z.number().int().min(0).default(5),
 });
 
 const observationSchema = z.object({
@@ -72,6 +75,18 @@ const loggingSchema = z.object({
   log_file: z.string().nullable().default(null),
 });
 
+const chatSchema = z.object({
+  reply_cooldown_seconds: z.number().min(0).default(3),
+  max_replies_per_minute: z.number().int().min(1).default(10),
+  respond_to_ambient: z.boolean().default(false),
+});
+
+const memorySchema = z.object({
+  soul_file: z.string().min(1).default("SOUL.md"),
+  memory_file: z.string().min(1).default("MEMORY.md"),
+  tasks_file: z.string().min(1).default("TASKS.md"),
+});
+
 export const configSchema = z.object({
   llm: llmSchema,
   minecraft: minecraftSchema.prefault({}),
@@ -80,6 +95,8 @@ export const configSchema = z.object({
   tools: toolsSchema.prefault({}),
   pathfinder: pathfinderSchema.prefault({}),
   logging: loggingSchema.prefault({}),
+  chat: chatSchema.prefault({}),
+  memory: memorySchema.prefault({}),
 });
 
 export type LodestoneConfig = z.infer<typeof configSchema>;

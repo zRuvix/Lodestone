@@ -26,9 +26,22 @@ minecraft:
 agent:
   max_turns: 40
   system_prompt_file: "prompts/system.md"
-  allowed_tools: [observe, goto, collect_block, say]
+  allowed_tools: [observe, goto, collect_block, say, read_file, write_file]
   parallel_read_only_tools: false
   keep_last_observations: 3
+  heartbeat_seconds: 30
+  heartbeat_max_turns: 8
+  reconnect_attempts: 5
+
+chat:
+  reply_cooldown_seconds: 3
+  max_replies_per_minute: 10
+  respond_to_ambient: false
+
+memory:
+  soul_file: "SOUL.md"
+  memory_file: "MEMORY.md"
+  tasks_file: "TASKS.md"
 
 observation:
   radius: 16
