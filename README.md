@@ -20,6 +20,8 @@ cp .env.example .env                  # .env is gitignored
 
 ```bash
 npm run check:llm
+# with a custom config path:
+npm run check:llm -- --config /path/to/config.yaml
 ```
 
 Sends a minimal non-streaming request, a streaming request (if `llm.stream` is true),
@@ -57,6 +59,16 @@ reference). Highlights:
   `allow_sprinting`, `allow_parkour`, `max_drop_down`, `allow_1by1_towers`).
   No placing in M1 by design.
 
+## Running the agent
+
+```bash
+npm run dev -- "Collect 5 oak logs, then tell me in chat when you're done"
+npm run dev -- --config ./config.yaml "Your goal here"
+echo "Your goal here" | npm run dev
+```
+
+Ctrl+C cancels the run (aborts the in-flight LLM request and tool).
+
 ## Scripts
 
 - `npm run dev` — run the agent (goal via CLI arg or stdin)
@@ -65,4 +77,6 @@ reference). Highlights:
 - `npm run lint` — eslint
 - `npm run check:llm` — LLM connectivity check
 - `npm run test:integration` — opt-in integration tests (`RUN_INTEGRATION=1`),
-  non-destructive (observe + goto only, no digging/placing)
+  non-destructive (observe + goto only, no digging/placing).
+  Needs `config.yaml` plus the key env var, e.g.
+  `LODESTONE_API_KEY=... RUN_INTEGRATION=1 npm run test:integration`
