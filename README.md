@@ -88,7 +88,7 @@ if missing), works TASKS.md top-down when idle, and heartbeats every
 Chat takes a fast path: greetings answered instantly (~0ms, no LLM), other
 messages classified by one short LLM call — `SAY` (gupshup answered inline,
 main loop never sees it) or `DO` (ack in chat + forwarded to the main loop
-for follow/collect/craft/attack). Disable with `chat.fast_lane: false`.
+for follow/collect/craft/attack). While the lane is on, ambient chatter is also classified and `chat.respond_to_ambient` only applies with `chat.fast_lane: false`. Disable with `chat.fast_lane: false`.
 
 ## Safety
 

@@ -155,7 +155,7 @@ async function main(): Promise<void> {
       agent.inject(formatChatInject(username, message));
       return;
     }
-    void lane.handleChat(username, message);
+    void lane.handleChat(username, message).catch((err) => console.log(`[lane] error: ${safe(err instanceof Error ? err.message : String(err))}`));
   });
 
   let shuttingDown = false;
