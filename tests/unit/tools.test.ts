@@ -197,6 +197,78 @@ describe("attack", () => {
   });
 });
 
+describe("drop", () => {
+  function dropBot() {
+    const items = [
+      { name: "oak_log", type: 1, metadata: 0, count: 5 },
+      { name: "oak_log", type: 1, metadata: 0, count: 3 },
+    ];
+    return {
+      inventory: { items: () => items },
+      tossStack: async () => {},
+      toss: async () => {},
+    };
+  }
+
+  it("drops all matching stacks by default", async () => {
+    const tool = getTool("drop")!;
+    const bot = dropBot();
+    const tossStack = (bot.tossStack = async () => {});
+    void tossStack;
+    const res = await tool.run(
+      tool.schema.parse({ item: "oak_log" }),
+      { bot: bot as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(false);
+    expect(res.text).toMatch(/Dropped 8 oak_log/);
+  });
+
+  it("drops an exact count", async () => {
+    const tool = getTool("drop")!;
+    const tossed: number[] = [];
+    const bot = {
+      ...dropBot(),
+      tossStack: async () => {
+        tossed.push(-1);
+      },
+      toss: async (_t: number, _m: number | null, n: number) => {
+        tossed.push(n);
+      },
+    };
+    const res = await tool.run(
+      tool.schema.parse({ item: "oak_log", count: 6 }),
+      { bot: bot as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(false);
+    expect(res.text).toMatch(/Dropped 6 oak_log/);
+    expect(tossed).toEqual([-1, 1]);
+  });
+
+  it("errors when not holding the item", async () => {
+    const tool = getTool("drop")!;
+    const res = await tool.run(
+      tool.schema.parse({ item: "diamond" }),
+      { bot: dropBot() as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(true);
+    expect(res.text).toMatch(/not holding/);
+  });
+
+  it("errors when holding fewer than count", async () => {
+    const tool = getTool("drop")!;
+    const res = await tool.run(
+      tool.schema.parse({ item: "oak_log", count: 99 }),
+      { bot: dropBot() as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(true);
+    expect(res.text).toMatch(/only holding 8/);
+  });
+});
+
 describe("say", () => {
   it("sends chat and echoes", async () => {
     const tool = getTool("say")!;

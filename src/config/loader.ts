@@ -13,7 +13,7 @@ export interface LoadedConfig {
 }
 
 /** Names of tools the agent loop may expose. Unknown names in config are an error. */
-export const KNOWN_TOOL_NAMES = ["observe", "goto", "collect_block", "craft", "attack", "say", "read_file", "write_file"];
+export const KNOWN_TOOL_NAMES = ["observe", "goto", "collect_block", "craft", "attack", "drop", "say", "read_file", "write_file"];
 
 function formatZodError(error: z.ZodError): string {
   return error.issues

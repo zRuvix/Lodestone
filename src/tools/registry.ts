@@ -2,6 +2,7 @@ import { toJSONSchema } from "zod";
 import { attackTool } from "./attack.js";
 import { collectBlockTool } from "./collectBlock.js";
 import { craftTool } from "./craft.js";
+import { dropTool } from "./drop.js";
 import { gotoTool } from "./goto.js";
 import { observeTool } from "./observe.js";
 import { readFileTool } from "./readFile.js";
@@ -15,6 +16,7 @@ export const TOOL_REGISTRY: ToolDef[] = [
   collectBlockTool,
   craftTool,
   attackTool,
+  dropTool,
   sayTool,
   readFileTool,
   writeFileTool,
