@@ -47,7 +47,12 @@ export const collectBlockTool: ToolDef = {
         };
       }
 
-      const { goals } = await import("mineflayer-pathfinder");
+      const mod = await import("mineflayer-pathfinder");
+      const goals = (
+        ((mod as unknown as { default?: unknown }).default ?? mod) as {
+          goals: typeof import("mineflayer-pathfinder").goals;
+        }
+      ).goals;
       const startCount = countInInventory(bot, blockName);
 
       const collected = await withToolTimeout(

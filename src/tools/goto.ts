@@ -1,7 +1,13 @@
 import { z } from "zod";
-import { goals } from "mineflayer-pathfinder";
 import { safeRun, withToolTimeout } from "./timeout.js";
 import type { ToolDef } from "./types.js";
+
+async function loadGoals() {
+  const mod = await import("mineflayer-pathfinder");
+  // mineflayer-pathfinder is CJS; handle both interop shapes.
+  const pkg = (mod as unknown as { default?: unknown }).default ?? mod;
+  return (pkg as { goals: typeof import("mineflayer-pathfinder").goals }).goals;
+}
 
 const gotoSchema = z
   .object({
@@ -31,6 +37,7 @@ export const gotoTool: ToolDef = {
   async run(args, ctx, signal) {
     return safeRun(async () => {
       const bot = ctx.bot as unknown as PathfinderBot;
+      const goals = await loadGoals();
       const cfg = ctx.config.tools.goto;
       const timeoutMs = cfg.timeout_seconds * 1000;
 

@@ -6,8 +6,17 @@ export async function applyMovements(
   bot: Bot,
   cfg: LodestoneConfig["pathfinder"],
 ): Promise<void> {
-  const { Movements } = await import("mineflayer-pathfinder");
-  const move = new Movements(bot as never);
+  const mod = await import("mineflayer-pathfinder");
+  const pkg = ((mod as unknown as { default?: unknown }).default ?? mod) as {
+    Movements: new (bot: unknown) => {
+      canDig: boolean;
+      allowSprinting: boolean;
+      allowParkour: boolean;
+      maxDropDown: number;
+      allow1by1towers: boolean;
+    };
+  };
+  const move = new pkg.Movements(bot as never);
   move.canDig = cfg.can_dig;
   move.allowSprinting = cfg.allow_sprinting;
   move.allowParkour = cfg.allow_parkour;
