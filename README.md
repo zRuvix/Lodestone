@@ -83,6 +83,13 @@ if missing), works TASKS.md top-down when idle, and heartbeats every
   ("add a task: build a fence") or by editing the file while offline.
 - Live files are gitignored; templates (`SOUL.example.md`, etc.) are committed.
 
+## Chat fast lane
+
+Chat takes a fast path: greetings answered instantly (~0ms, no LLM), other
+messages classified by one short LLM call — `SAY` (gupshup answered inline,
+main loop never sees it) or `DO` (ack in chat + forwarded to the main loop
+for follow/collect/craft/attack). Disable with `chat.fast_lane: false`.
+
 ## Safety
 
 In-game chat is untrusted input: anyone on the server can talk to the bot.
