@@ -44,6 +44,19 @@ reference). Highlights:
   `auth: offline` needs no credentials; `microsoft` triggers device-code auth.
 - `agent.allowed_tools` must name known tools only.
 
+## Tools (Milestone 1)
+
+- `observe` (read-only) — position, health, food, time, dimension, inventory,
+  nearby entities and block types within the observation radius.
+- `goto` — pathfind to `{x, y, z}` or a named `{player}`; arrives within
+  `tools.goto.arrive_distance`, times out per `tools.goto.timeout_seconds`.
+- `collect_block` — find nearest `{block}`, path, dig, pick up drops, repeat to
+  `{count}` (capped by `tools.collect_block.max_count`).
+- `say` — send a chat message.
+- Pathfinder `Movements` come from the `pathfinder:` block (`can_dig`,
+  `allow_sprinting`, `allow_parkour`, `max_drop_down`, `allow_1by1_towers`).
+  No placing in M1 by design.
+
 ## Scripts
 
 - `npm run dev` — run the agent (goal via CLI arg or stdin)
