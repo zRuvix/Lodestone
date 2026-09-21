@@ -212,9 +212,17 @@ export function createAgent(options: AgentOptions) {
           note: err instanceof Error ? err.message : String(err),
         };
       }
-      totalIn += response.inputTokens ?? 0;
-      totalOut += response.outputTokens ?? 0;
-      options.hooks?.onTurn?.(turns + 1, response.inputTokens ?? 0, response.outputTokens ?? 0);
+      // Some gateways omit usage on streaming/non-streaming responses;
+      // fall back to -1 so logs don't silently claim zero.
+      const inT = response.inputTokens;
+      const outT = response.outputTokens;
+      totalIn += inT ?? 0;
+      totalOut += outT ?? 0;
+      const haveUsage = inT !== undefined || outT !== undefined;
+      options.hooks?.onTurn?.(turns + 1, inT ?? -1, outT ?? -1);
+      if (!haveUsage) {
+        options.hooks?.onText?.("(usage not reported by endpoint for this turn)");
+      }
 
       const text = normalizedText(response);
       if (text && text.trim().length > 0) options.hooks?.onText?.(text);

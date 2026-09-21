@@ -2,7 +2,7 @@ import type { LodestoneConfig } from "../config/schema.js";
 
 /** Minimal bot surface the snapshot needs (structural, mockable). */
 export interface SnapshotBot {
-  entity?: { position?: { x: number; y: number; z: number } };
+  entity?: { position?: { x: number; y: number; z: number; floored?: () => unknown } };
   health?: number;
   food?: number;
   time?: { timeOfDay?: number };
@@ -16,7 +16,13 @@ export interface SnapshotBot {
       position?: { x: number; y: number; z: number; distanceTo: (p: unknown) => number };
     }
   >;
-  findBlocks?: (opts: unknown) => string[] | { name: string }[];
+  blockAt?: (pos: unknown) => { name: string; position?: unknown } | null;
+  findBlocks?: (opts: {
+    point?: unknown;
+    matching: (block: { name: string } | null) => boolean;
+    maxDistance: number;
+    count: number;
+  }) => unknown[];
 }
 
 function fmt(n: number): string {
@@ -69,11 +75,24 @@ export function buildSnapshot(
       (extraEntities > 0 ? ` and ${extraEntities} more` : ""),
   );
 
-  // Notable block types nearby via findBlocks (names only, capped).
+  // Notable block types nearby: scan loaded blocks within radius
+  // (excluding air), then count by name. findBlocks returns positions,
+  // so resolve names via blockAt.
   let blockNames: string[] = [];
   try {
-    const found = bot.findBlocks?.({}) ?? [];
-    blockNames = found.map((b) => (typeof b === "string" ? b : b.name));
+    const positions = bot.findBlocks?.({
+      point: pos,
+      matching: (b) => !!b && b.name !== "air" && b.name !== "cave_air",
+      maxDistance: cfg.radius,
+      count: 256,
+    }) ?? [];
+    const at = bot.blockAt;
+    if (at) {
+      for (const p of positions) {
+        const b = at(p);
+        if (b && b.name !== "air" && b.name !== "cave_air") blockNames.push(b.name);
+      }
+    }
   } catch {
     blockNames = [];
   }

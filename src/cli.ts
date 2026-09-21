@@ -92,7 +92,7 @@ async function main(): Promise<void> {
       beforeTool: (name, input) => console.log(`[tool] ${name} ${safe(JSON.stringify(input))}`),
       afterTool: (name, result) =>
         console.log(`[result] ${name} ${result.isError ? "ERROR" : "ok"}: ${safe(result.text).slice(0, 500)}`),
-      onTurn: (turn, inT, outT) => console.log(`--- turn ${turn} (in=${inT}, out=${outT}) ---`),
+      onTurn: (turn, inT, outT) => console.log(`--- turn ${turn} (in=${inT < 0 ? "n/a" : inT}, out=${outT < 0 ? "n/a" : outT}) ---`),
       onText: (text) => {
         if (config.logging.show_reasoning) console.log(`[model] ${safe(text).slice(0, 1000)}`);
       },

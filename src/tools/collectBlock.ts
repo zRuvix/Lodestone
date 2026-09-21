@@ -55,17 +55,21 @@ export const collectBlockTool: ToolDef = {
       ).goals;
       const startCount = countInInventory(bot, blockName);
 
-      const collected = await withToolTimeout(
+      // Dig one block at a time, but count INVENTORY delta — not digs.
+      // Drops can scatter or fall out of reach, so keep going until `want`
+      // are actually held (or none remain / timeout / cancel).
+      await withToolTimeout(
         async (inner) => {
-          let dug = 0;
-          while (dug < want) {
+          let held = countInInventory(bot, blockName) - startCount;
+          let attemptsWithoutGain = 0;
+          while (held < want) {
             if (inner.aborted || signal.aborted) throw new Error("Tool cancelled");
             const found = bot.findBlock({
               matching: blockId,
               maxDistance: cfg.search_radius,
             });
             if (!found) {
-              if (dug === 0) {
+              if (held === 0) {
                 throw new Error(
                   `No '${blockName}' within ${cfg.search_radius} blocks. Hint: move elsewhere (goto) or try observe first.`,
                 );
@@ -87,9 +91,18 @@ export const collectBlockTool: ToolDef = {
               );
             }
             await bot.dig(target);
-            dug += 1;
+            // Wait briefly for drops to be picked up.
+            await new Promise((r) => setTimeout(r, 750));
+            const nowHeld = countInInventory(bot, blockName) - startCount;
+            if (nowHeld > held) {
+              held = nowHeld;
+              attemptsWithoutGain = 0;
+            } else {
+              attemptsWithoutGain += 1;
+              if (attemptsWithoutGain >= 3) break;
+            }
           }
-          return dug;
+          return held;
         },
         timeoutMs,
         signal,
@@ -100,8 +113,15 @@ export const collectBlockTool: ToolDef = {
       });
 
       const now = countInInventory(bot, blockName);
+      const gained = now - startCount;
+      if (gained < want) {
+        return {
+          text: `Only ${gained}/${want} ${blockName} collected (inventory: ${startCount} -> ${now}). Hint: drops may have scattered — observe for item entities nearby, goto them, and retry.`,
+          isError: true,
+        };
+      }
       return {
-        text: `Collected ${collected} ${blockName} (inventory: ${startCount} -> ${now}).`,
+        text: `Collected ${gained} ${blockName} (inventory: ${startCount} -> ${now}).`,
         isError: false,
       };
     });

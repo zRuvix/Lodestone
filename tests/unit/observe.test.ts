@@ -8,12 +8,17 @@ function fakeConfig(): LodestoneConfig["observation"] {
 
 // Minimal mock of the bot surface snapshot.ts needs.
 function fakeBot() {
+  const blocks: Record<string, string> = {};
+  const key = (x: number, y: number, z: number) => `${x},${y},${z}`;
+  blocks[key(2, 64, 0)] = "oak_log";
+  blocks[key(3, 64, 0)] = "oak_log";
+  blocks[key(4, 64, 0)] = "dirt";
   return {
     entity: { position: { x: 1.5, y: 64, z: -3.25 } },
     health: 20,
     food: 20,
     time: { timeOfDay: 6000 },
-    game: { dimension: "minecraft:overworld" },
+    game: { dimension: "overworld" },
     inventory: {
       items: () => [
         { name: "oak_log", count: 5 },
@@ -32,7 +37,19 @@ function fakeBot() {
         position: { x: 50, y: 64, z: 0, distanceTo: () => 49 },
       },
     },
-    findBlocks: () => ["oak_log", "oak_log", "dirt", "stone"],
+    blockAt: (p: { x: number; y: number; z: number }) => {
+      const name = blocks[key(Math.round(p.x), Math.round(p.y), Math.round(p.z))];
+      return name ? { name } : { name: "air" };
+    },
+    findBlocks: (opts: { count: number }) => {
+      const out = [];
+      for (const [k] of Object.entries(blocks)) {
+        if (out.length >= opts.count) break;
+        const [x, y, z] = k.split(",").map(Number);
+        out.push({ x, y, z });
+      }
+      return out;
+    },
   };
 }
 
@@ -44,7 +61,8 @@ describe("buildSnapshot", () => {
     expect(text).toMatch(/oak_log x5/);
     expect(text).toMatch(/Zombie/);
     expect(text).not.toMatch(/Pig/); // beyond radius
-    expect(text).toMatch(/oak_log/);
+    expect(text).toMatch(/oak_log x2/);
+    expect(text).toMatch(/dim: overworld/);
   });
 
   it("truncates entities and block types to configured maxima", () => {

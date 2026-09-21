@@ -30,6 +30,7 @@ describe("observe", () => {
       food: 20,
       inventory: { items: () => [] },
       entities: {},
+      blockAt: () => ({ name: "air" }),
       findBlocks: () => [],
     };
     const res = await tool.run({}, { bot: bot as never, config: testConfig() }, new AbortController().signal);

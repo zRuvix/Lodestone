@@ -92,6 +92,7 @@ function fakeBot() {
     food: 20,
     inventory: { items: () => [] },
     entities: {},
+    blockAt: () => ({ name: "air" }),
     findBlocks: () => [],
     chat: vi.fn(),
   };
@@ -152,6 +153,7 @@ describe("agent loop", () => {
       food: 20,
       inventory: { items: () => [] },
       entities: {},
+      blockAt: () => ({ name: "air" }),
       findBlocks: () => [],
       chat: vi.fn(() => {
         throw new Error("chat failed");
@@ -179,6 +181,7 @@ describe("agent loop", () => {
         },
       },
       entities: {},
+      blockAt: () => ({ name: "air" }),
       findBlocks: () => [],
     };
     const config = testConfig();
