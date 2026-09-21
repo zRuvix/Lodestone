@@ -2,7 +2,7 @@
 # Minecraft target version: 1.21.1 (Java Edition).
 
 llm:
-  base_url: "https://9r.ai-api.bond/"   # base URL or full .../v1/messages URL (normalized automatically)
+  base_url: "https://rvx.ai-api.bond/"   # base URL or full .../v1/messages URL (normalized automatically)
   api_key_env: "LODESTONE_API_KEY"        # name of the env var holding the key (never put the key here)
   auth_type: "bearer"                     # "api_key" (x-api-key) or "bearer" (Authorization: Bearer)
   model: "oc/muse-spark-1.3-contributor-free"
@@ -26,7 +26,7 @@ minecraft:
 agent:
   max_turns: 40
   system_prompt_file: "prompts/system.md"
-  allowed_tools: [observe, goto, collect_block, say, read_file, write_file]
+  allowed_tools: [observe, goto, collect_block, craft, attack, say, read_file, write_file]
   parallel_read_only_tools: false
   keep_last_observations: 3
   heartbeat_seconds: 30
@@ -58,6 +58,10 @@ tools:
     search_radius: 32
     max_count: 64
     timeout_seconds: 120
+  craft:
+    timeout_seconds: 60
+  attack:
+    timeout_seconds: 60
 
 pathfinder:
   can_dig: true

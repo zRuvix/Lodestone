@@ -59,6 +59,16 @@ const toolsSchema = z.object({
       timeout_seconds: z.number().positive().default(120),
     })
     .prefault({}),
+  craft: z
+    .object({
+      timeout_seconds: z.number().positive().default(60),
+    })
+    .prefault({}),
+  attack: z
+    .object({
+      timeout_seconds: z.number().positive().default(60),
+    })
+    .prefault({}),
 });
 
 const pathfinderSchema = z.object({

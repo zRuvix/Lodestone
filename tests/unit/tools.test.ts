@@ -81,6 +81,122 @@ describe("goto", () => {
   });
 });
 
+describe("craft", () => {
+  function craftBot() {
+    const items = [{ name: "sticks", count: 0 }];
+    return {
+      registry: { itemsByName: { sticks: { id: 1 } }, blocksByName: {} },
+      findBlock: vi.fn(() => null),
+      recipesFor: vi.fn(() => [{ requiresTable: false }]),
+      craft: vi.fn(async () => {
+        items[0]!.count += 4;
+      }),
+      inventory: { items: () => items },
+    };
+  }
+
+  it("crafts and reports inventory delta", async () => {
+    const tool = getTool("craft")!;
+    const bot = craftBot();
+    const res = await tool.run(
+      { item: "sticks", count: 1 },
+      { bot: bot as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(false);
+    expect(res.text).toMatch(/Crafted 4 sticks/);
+    expect(bot.craft).toHaveBeenCalledOnce();
+  });
+
+  it("errors on unknown item names", async () => {
+    const tool = getTool("craft")!;
+    const res = await tool.run(
+      { item: "unobtainium_sword" },
+      { bot: craftBot() as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(true);
+    expect(res.text).toMatch(/unknown item/);
+  });
+
+  it("hints about crafting table when no recipe without one", async () => {
+    const tool = getTool("craft")!;
+    const bot = { ...craftBot(), recipesFor: vi.fn(() => []) };
+    const res = await tool.run(
+      { item: "sticks" },
+      { bot: bot as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(true);
+    expect(res.text).toMatch(/crafting table/);
+  });
+});
+
+describe("attack", () => {
+  function attackBot() {
+    const sheep = {
+      name: "Sheep",
+      position: {
+        x: 1,
+        y: 64,
+        z: 1,
+        distanceTo: () => 2,
+      },
+    };
+    return {
+      entity: { position: { x: 0, y: 64, z: 0 } },
+      entities: { e1: sheep },
+      lookAt: vi.fn(async () => {}),
+      attack: vi.fn(async () => {
+        delete (attackBotRef.entities as Record<string, unknown>)["e1"];
+      }),
+    };
+  }
+  let attackBotRef: ReturnType<typeof attackBot>;
+  function trackedBot() {
+    attackBotRef = attackBot();
+    return attackBotRef;
+  }
+
+  it("kills a nearby mob", async () => {
+    const tool = getTool("attack")!;
+    const bot = trackedBot();
+    const parsed = tool.schema.parse({ target: "sheep" });
+    const res = await tool.run(
+      parsed,
+      { bot: bot as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(false);
+    expect(res.text).toMatch(/Killed 'sheep'/);
+    expect(bot.attack).toHaveBeenCalled();
+  });
+
+  it("refuses to attack players", async () => {
+    const tool = getTool("attack")!;
+    const res = await tool.run(
+      { target: "player" },
+      { bot: trackedBot() as never, config: testConfig() },
+      new AbortController().signal,
+    );
+    expect(res.isError).toBe(true);
+    expect(res.text).toMatch(/don't attack players/);
+  });
+
+  it("respects cancellation", async () => {
+    const tool = getTool("attack")!;
+    const c = new AbortController();
+    c.abort();
+    const res = await tool.run(
+      { target: "sheep" },
+      { bot: trackedBot() as never, config: testConfig() },
+      c.signal,
+    );
+    expect(res.isError).toBe(true);
+    expect(res.text).toMatch(/cancel/i);
+  });
+});
+
 describe("say", () => {
   it("sends chat and echoes", async () => {
     const tool = getTool("say")!;
