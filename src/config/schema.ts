@@ -89,6 +89,8 @@ const chatSchema = z.object({
   reply_cooldown_seconds: z.number().min(0).default(3),
   max_replies_per_minute: z.number().int().min(1).default(10),
   respond_to_ambient: z.boolean().default(false),
+  fast_lane: z.boolean().default(true),
+  fast_max_tokens: z.number().int().positive().default(128),
 });
 
 const memorySchema = z.object({

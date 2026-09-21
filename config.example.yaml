@@ -37,6 +37,8 @@ chat:
   reply_cooldown_seconds: 3
   max_replies_per_minute: 10
   respond_to_ambient: false
+  fast_lane: true               # dedicated fast chat path (instant greetings + SAY/DO classifier)
+  fast_max_tokens: 128          # token cap for the classifier call
 
 memory:
   soul_file: "SOUL.md"
