@@ -41,6 +41,7 @@ reference). Highlights:
   "don't send"; prompt caching off unless enabled; no `anthropic-beta` headers
   unless configured.
 - `minecraft`: host/port/version (`1.21.1`)/username/auth (`offline`|`microsoft`).
+  `auth: offline` needs no credentials; `microsoft` triggers device-code auth.
 - `agent.allowed_tools` must name known tools only.
 
 ## Scripts
